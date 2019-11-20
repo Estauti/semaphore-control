@@ -1,28 +1,35 @@
 #include<stdio.h>
+#include<stdlib.h>
 #include <stdbool.h>
+#include<time.h>
+
+#define NUM_THREADS 2
 
 struct semaphore {
   int id;
   int qtd_cars;
 };
 
+struct semaphore sem[NUM_THREADS], *sem_p[NUM_THREADS];
+
 int popCar(struct semaphore *sem) {
   return --sem->qtd_cars;
 }
 
+void initializeSemaphores() {
+  srand (time(NULL));
+
+  for (size_t i = 0; i < NUM_THREADS; i++) {
+    sem[i].id = i;
+    sem[i].qtd_cars = rand() % 10;
+    sem_p[i] = &sem[i];
+
+    printf("%d\n", sem[i].qtd_cars);
+  }
+}
+
 int main() {
-  struct semaphore sem[2], *sem_p[2];
-  sem[0].id = 0;
-  sem[0].qtd_cars = 5;
-  sem_p[0] = &sem[0];
-
-  sem[1].id = 1;
-  sem[1].qtd_cars = 7;
-  sem_p[1] = &sem[1];
-
-  printf("%d\n", sem_p[0]->qtd_cars);
-  popCar(sem_p[0]);
-  printf("%d\n", sem_p[0]->qtd_cars);
+  initializeSemaphores();
 
   return 0;
 }
