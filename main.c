@@ -4,7 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define NUM_THREADS 2
+#define NUM_SEMAPHORES 2
 #define CARS_PER_RELEASE 2
 
 struct semaphore {
@@ -12,7 +12,7 @@ struct semaphore {
   int cars_count;
 };
 
-struct semaphore sem[NUM_THREADS];
+struct semaphore sem[NUM_SEMAPHORES];
 
 int popCarAt(int semaphore_index) {
   return --sem[semaphore_index].cars_count;
@@ -28,7 +28,7 @@ void sleepMilliseconds(int milliseconds) {
 void initializeSemaphores() {
   srand (time(NULL));
 
-  for (int i = 0; i < NUM_THREADS; i++) {
+  for (int i = 0; i < NUM_SEMAPHORES; i++) {
     sem[i].id = i;
     sem[i].cars_count = rand() % 10;
 
@@ -47,7 +47,7 @@ int busiestSemaphore() {
   int semaphore_index = 0;
   int max_cars = 0;
 
-  for (size_t i = 0; i < NUM_THREADS; i++) {
+  for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
     if (sem[i].cars_count > max_cars) {
       semaphore_index = i;
       max_cars = sem[i].cars_count;
@@ -89,7 +89,7 @@ int main() {
   while(1) {
     sleep(2);
     // a cada 400 ms adiciona novos carros
-    incomingCarsAt(rand() % NUM_THREADS);
+    incomingCarsAt(rand() % NUM_SEMAPHORES);
 
     // a cada 200 ms mede quantidade de carros por semáforo
     // necessário nesse caso onde já tenho contabilizado as quantidades?
