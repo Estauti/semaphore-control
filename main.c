@@ -12,48 +12,10 @@ struct semaphore {
   int cars_count;
 };
 
-struct semaphore sem[NUM_SEMAPHORES];
+struct semaphore sem[NUM_SEMAPHORES], *sem_p[NUM_SEMAPHORES];
 
 int popCarAt(int semaphore_index) {
   return --sem[semaphore_index].cars_count;
-}
-
-void sleepMilliseconds(int milliseconds) {
-  struct timespec tim;
-  tim.tv_sec = 0;
-  tim.tv_nsec = milliseconds*1000000L;
-  nanosleep(&tim , NULL);
-}
-
-void initializeSemaphores() {
-  srand (time(NULL));
-
-  for (int i = 0; i < NUM_SEMAPHORES; i++) {
-    sem[i].id = i;
-    sem[i].cars_count = rand() % 10;
-
-    printf("rua %d, com %d carros\n", i, sem[i].cars_count);
-  }
-}
-
-int incomingCarsAt(int street) {
-  int cars_count = rand() % 3 + 1;
-  sem[street].cars_count += cars_count;
-  printf("na rua '%d', chegaram %d carros, ficando com %d\n", street, cars_count, sem[street].cars_count);
-  return sem[street].cars_count;
-}
-
-int busiestSemaphore() {
-  int semaphore_index = 0;
-  int max_cars = 0;
-
-  for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
-    if (sem[i].cars_count > max_cars) {
-      semaphore_index = i;
-      max_cars = sem[i].cars_count;
-    }
-  }
-  return semaphore_index;
 }
 
 int numberCarsToRelease(int current_cars_count) {
@@ -77,17 +39,55 @@ int releaseSemaphoreCars(int semaphore_index) {
   return qty_cars;
 }
 
+void sleepMilliseconds(int milliseconds) {
+  struct timespec tim;
+  tim.tv_sec = 0;
+  tim.tv_nsec = milliseconds*1000000L;
+  nanosleep(&tim , NULL);
+}
+
 void openSemaphore(int semaphore_index) {
   // cada semáforo libera 2 carros, demorando 200 ms pra tal
   int number_released_cars = releaseSemaphoreCars(semaphore_index);
   sleepMilliseconds(number_released_cars*100);
 }
 
+int busiestSemaphore() {
+  int semaphore_index = 0;
+  int max_cars = 0;
+
+  for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
+    if (sem[i].cars_count > max_cars) {
+      semaphore_index = i;
+      max_cars = sem[i].cars_count;
+    }
+  }
+  return semaphore_index;
+}
+
+int incomingCarsAt(int street) {
+  int cars_count = rand() % 3 + 1;
+  sem[street].cars_count += cars_count;
+  printf("na rua '%d', chegaram %d carros, ficando com %d\n", street, cars_count, sem[street].cars_count);
+  return sem[street].cars_count;
+}
+
+void initializeSemaphores() {
+  srand (time(NULL));
+
+  for (int i = 0; i < NUM_SEMAPHORES; i++) {
+    sem[i].id = i;
+    sem[i].cars_count = rand() % 10;
+    sem_p[i] = &sem[i];
+
+    printf("rua %d, com %d carros\n", i, sem[i].cars_count);
+  }
+}
+
 int main() {
   initializeSemaphores();
 
   while(1) {
-    sleep(2);
     // a cada 400 ms adiciona novos carros
     incomingCarsAt(rand() % NUM_SEMAPHORES);
 
