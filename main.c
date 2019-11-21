@@ -57,14 +57,11 @@ int busiestSemaphore() {
 }
 
 int numberCarsToRelease(int current_cars_count) {
-  if (current_cars_count >= 2) {
-    return 2;
-  }
-  else if (current_cars_count == 1) {
-    return 1;
+  if (CARS_PER_RELEASE >= current_cars_count) {
+    return current_cars_count;
   }
   else {
-    return 0;
+    return CARS_PER_RELEASE;
   }
 }
 
@@ -80,7 +77,7 @@ int releaseSemaphoreCars(int semaphore_index) {
   return qty_cars;
 }
 
-void releaseSemaphore(int semaphore_index) {
+void openSemaphore(int semaphore_index) {
   // cada semáforo libera 2 carros, demorando 200 ms pra tal
   int number_released_cars = releaseSemaphoreCars(semaphore_index);
   sleepMilliseconds(number_released_cars*100);
@@ -99,7 +96,7 @@ int main() {
 
     // a cada 200 ms escolhe o semáforo que será aberto
     int semaphore_index = busiestSemaphore();
-    releaseSemaphore(semaphore_index);
+    openSemaphore(semaphore_index);
   }
 
   return 0;
