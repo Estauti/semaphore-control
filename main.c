@@ -16,7 +16,7 @@ struct semaphore {
 struct semaphore sem[NUM_SEMAPHORES], *sem_p[NUM_SEMAPHORES];
 
 int popCarAt(int semaphore_index) {
-  return --sem[semaphore_index].cars_count;
+  return --sem_p[semaphore_index]->cars_count;
 }
 
 int numberCarsToRelease(int current_cars_count) {
@@ -29,14 +29,14 @@ int numberCarsToRelease(int current_cars_count) {
 }
 
 int releaseSemaphoreCars(int semaphore_index) {
-  int qty_cars = numberCarsToRelease(sem[semaphore_index].cars_count);
+  int qty_cars = numberCarsToRelease(sem_p[semaphore_index]->cars_count);
 
   for (size_t i = 0; i < qty_cars; i++)
   {
     popCarAt(semaphore_index);
   }
 
-  printf("liberou %d carros da rua '%d', ficando com %d carros\n", qty_cars, semaphore_index, sem[semaphore_index].cars_count);
+  printf("liberou %d carros da rua '%d', ficando com %d carros\n", qty_cars, semaphore_index, sem_p[semaphore_index]->cars_count);
   return qty_cars;
 }
 
@@ -58,19 +58,23 @@ int busiestSemaphore() {
   int max_cars = 0;
 
   for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
-    if (sem[i].cars_count > max_cars) {
+    if (sem_p[i]->cars_count > max_cars) {
       semaphore_index = i;
-      max_cars = sem[i].cars_count;
+      max_cars = sem_p[i]->cars_count;
     }
   }
   return semaphore_index;
 }
 
-int incomingCarsAt(int street) {
-  int cars_count = rand() % 3 + 1;
-  sem[street].cars_count += cars_count;
-  printf("na rua '%d', chegaram %d carros, ficando com %d\n", street, cars_count, sem[street].cars_count);
-  return sem[street].cars_count;
+int generateCarCount() {
+  return rand() % 3 + 1;
+}
+
+void incomingCarsAt(int street) {
+  int cars_count = generateCarCount();
+  sem_p[street]->cars_count += cars_count;
+
+  printf("na rua '%d', chegaram %d carros, ficando com %d\n", street, cars_count, sem_p[street]->cars_count);
 }
 
 void initializeSemaphores() {
@@ -81,7 +85,7 @@ void initializeSemaphores() {
     sem[i].cars_count = rand() % 10;
     sem_p[i] = &sem[i];
 
-    printf("rua %d, com %d carros\n", i, sem[i].cars_count);
+    printf("rua %d, com %d carros\n", i, sem_p[i]->cars_count);
   }
 }
 
