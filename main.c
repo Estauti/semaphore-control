@@ -6,6 +6,7 @@
 
 #define NUM_SEMAPHORES 2
 #define CARS_PER_RELEASE 2
+#define TIME_TO_RELEASE_ONE_CAR 50
 
 struct semaphore {
   int id;
@@ -49,7 +50,7 @@ void sleepMilliseconds(int milliseconds) {
 void openSemaphore(int semaphore_index) {
   // cada semáforo libera 2 carros, demorando 200 ms pra tal
   int number_released_cars = releaseSemaphoreCars(semaphore_index);
-  sleepMilliseconds(number_released_cars*100);
+  sleepMilliseconds(number_released_cars * TIME_TO_RELEASE_ONE_CAR);
 }
 
 int busiestSemaphore() {
