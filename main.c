@@ -4,9 +4,15 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <alchemy/task.h>
+#include <alchemy/timer.h>
+#include <alchemy/sem.h>
+
 #define NUM_SEMAPHORES 2
 #define CARS_PER_RELEASE 2
 #define TIME_TO_RELEASE_ONE_CAR 50
+
+static RT_TASK incoming_cars_t, open_semaphore_t;
 
 struct semaphore {
   int id;
@@ -47,13 +53,7 @@ void sleepMilliseconds(int milliseconds) {
   nanosleep(&tim , NULL);
 }
 
-void openSemaphore(int semaphore_index) {
-  // cada semáforo libera 2 carros, demorando 200 ms pra tal
-  int number_released_cars = releaseSemaphoreCars(semaphore_index);
-  sleepMilliseconds(number_released_cars * TIME_TO_RELEASE_ONE_CAR);
-}
-
-int busiestSemaphore() {
+int getBusiestSemaphore() {
   int semaphore_index = 0;
   int max_cars = 0;
 
@@ -64,6 +64,14 @@ int busiestSemaphore() {
     }
   }
   return semaphore_index;
+}
+
+void openSemaphore() {
+  int semaphore_index = getBusiestSemaphore();
+
+  // cada semáforo libera 2 carros, demorando 200 ms pra tal
+  int number_released_cars = releaseSemaphoreCars(semaphore_index);
+  sleepMilliseconds(number_released_cars * TIME_TO_RELEASE_ONE_CAR);
 }
 
 int generateCarCount() {
@@ -89,20 +97,44 @@ void initializeSemaphores() {
   }
 }
 
+void openSemaphoreTask() {
+  rt_task_set_periodic(NULL, TM_NOW, 200000000);
+  while(1) {
+    openSemaphore();
+    rt_task_wait_period(NULL);
+  }
+}
+
+void incomingCarsTask() {
+  rt_task_set_periodic(NULL, TM_NOW, 400000000);
+  while(1) {
+    incomingCarsAt(rand() % NUM_SEMAPHORES);
+    rt_task_wait_period(NULL);
+  }
+}
+
 int main() {
   initializeSemaphores();
 
-  while(1) {
-    // a cada 400 ms adiciona novos carros
-    incomingCarsAt(rand() % NUM_SEMAPHORES);
+  // while(1) {
+  //   // a cada 400 ms adiciona novos carros
+  //   incomingCarsAt(rand() % NUM_SEMAPHORES);
 
-    // a cada 200 ms mede quantidade de carros por semáforo
-    // necessário nesse caso onde já tenho contabilizado as quantidades?
+  //   // a cada 200 ms mede quantidade de carros por semáforo
+  //   // necessário nesse caso onde já tenho contabilizado as quantidades?
 
-    // a cada 200 ms escolhe o semáforo que será aberto
-    int semaphore_index = busiestSemaphore();
-    openSemaphore(semaphore_index);
-  }
+  //   // a cada 200 ms escolhe o semáforo que será aberto
+  //   setBusiestSemaphore();
+  //   openSemaphore(semaphore_index);
+  // }
+
+  rt_task_create(&incoming_cars_t, "incomingCarsTask", 0, 1, 0);
+  rt_task_start(&incoming_cars_t, &incomingCarsTask, 0);
+
+  rt_task_create(&open_semaphore_t, "openSemaphoreTask", 0, 1, 0);
+  rt_task_start(&open_semaphore_t, &openSemaphoreTask, 0);
+
+  pause();
 
   return 0;
 }
