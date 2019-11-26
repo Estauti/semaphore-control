@@ -74,7 +74,6 @@ void openSemaphore() {
   rt_sem_p(&sem_1, TM_INFINITE);
   setBusiestSemaphore();
 
-  // cada semáforo libera 2 carros, demorando 200 ms pra tal
   int number_released_cars = releaseSemaphoreCars(semaphore_index_to_release);
   sleepMilliseconds(number_released_cars * TIME_TO_RELEASE_ONE_CAR);
   rt_sem_v(&sem_1);
@@ -121,18 +120,6 @@ void incomingCarsTask() {
 
 int main() {
   initializeSemaphores();
-
-  // while(1) {
-  //   // a cada 400 ms adiciona novos carros
-  //   incomingCarsAt(rand() % NUM_SEMAPHORES);
-
-  //   // a cada 200 ms mede quantidade de carros por semáforo
-  //   // necessário nesse caso onde já tenho contabilizado as quantidades?
-
-  //   // a cada 200 ms escolhe o semáforo que será aberto
-  //   setBusiestSemaphore();
-  //   openSemaphore(semaphore_index);
-  // }
 
   rt_sem_create (&sem_1, "sem_to_release", 1, S_FIFO);
 
