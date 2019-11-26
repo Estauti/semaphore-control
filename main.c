@@ -10,9 +10,13 @@
 
 #define NUM_SEMAPHORES 2
 #define CARS_PER_RELEASE 2
+#define CARS_PER_ARRIVAL 3
 #define TIME_TO_RELEASE_ONE_CAR 50
 
 static RT_TASK incoming_cars_t, open_semaphore_t;
+RT_SEM sem_1;
+
+int semaphore_index_to_release = 0;
 
 struct semaphore {
   int id;
@@ -53,7 +57,7 @@ void sleepMilliseconds(int milliseconds) {
   nanosleep(&tim , NULL);
 }
 
-int getBusiestSemaphore() {
+void setBusiestSemaphore() {
   int semaphore_index = 0;
   int max_cars = 0;
 
@@ -63,19 +67,21 @@ int getBusiestSemaphore() {
       max_cars = sem_p[i]->cars_count;
     }
   }
-  return semaphore_index;
+  semaphore_index_to_release = semaphore_index;
 }
 
 void openSemaphore() {
-  int semaphore_index = getBusiestSemaphore();
+  rt_sem_p(&sem_1, TM_INFINITE);
+  setBusiestSemaphore();
 
   // cada semáforo libera 2 carros, demorando 200 ms pra tal
-  int number_released_cars = releaseSemaphoreCars(semaphore_index);
+  int number_released_cars = releaseSemaphoreCars(semaphore_index_to_release);
   sleepMilliseconds(number_released_cars * TIME_TO_RELEASE_ONE_CAR);
+  rt_sem_v(&sem_1);
 }
 
 int generateCarCount() {
-  return rand() % 3 + 1;
+  return rand() % CARS_PER_ARRIVAL + 1;
 }
 
 void incomingCarsAt(int street) {
@@ -127,6 +133,8 @@ int main() {
   //   setBusiestSemaphore();
   //   openSemaphore(semaphore_index);
   // }
+
+  rt_sem_create (&sem_1, "sem_to_release", 1, S_FIFO);
 
   rt_task_create(&incoming_cars_t, "incomingCarsTask", 0, 1, 0);
   rt_task_start(&incoming_cars_t, &incomingCarsTask, 0);
