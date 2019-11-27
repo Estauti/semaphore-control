@@ -71,12 +71,10 @@ void setBusiestSemaphore() {
 }
 
 void openSemaphore() {
-  rt_sem_p(&sem_1, TM_INFINITE);
   setBusiestSemaphore();
 
   int number_released_cars = releaseSemaphoreCars(semaphore_index_to_release);
   sleepMilliseconds(number_released_cars * TIME_TO_RELEASE_ONE_CAR);
-  rt_sem_v(&sem_1);
 }
 
 int generateCarCount() {
