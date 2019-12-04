@@ -45,7 +45,7 @@ int releaseSemaphoreCars(int semaphore_index) {
     popCarAt(semaphore_index);
   }
 
-  printf("liberou %d carros da rua '%d', ficando com %d carros\n", qty_cars, semaphore_index, sem_p[semaphore_index]->cars_count);
+  printf("Liberou %d carros do sinaleiro '%d', ficando com %d carros\n", qty_cars, semaphore_index, sem_p[semaphore_index]->cars_count);
   return qty_cars;
 }
 
@@ -81,11 +81,11 @@ int generateCarCount() {
   return rand() % CARS_PER_ARRIVAL + 1;
 }
 
-void incomingCarsAt(int street) {
+void incomingCarsAt(int semaphore_index) {
   int cars_count = generateCarCount();
-  sem_p[street]->cars_count += cars_count;
+  sem_p[semaphore_index]->cars_count += cars_count;
 
-  printf("na rua '%d', chegaram %d carros, ficando com %d\n", street, cars_count, sem_p[street]->cars_count);
+  printf("No sinaleiro '%d', chegaram %d carros, ficando com %d\n", semaphore_index, cars_count, sem_p[semaphore_index]->cars_count);
 }
 
 void initializeSemaphores() {
@@ -97,14 +97,14 @@ void initializeSemaphores() {
     sem[i].cars_count = rand() % 10;
     sem_p[i] = &sem[i];
 
-    printf("rua %d, com %d carros\n", i, sem_p[i]->cars_count);
+    printf("Sinaleiro %d, com %d carros\n", i, sem_p[i]->cars_count);
   }
-  printf("TEMPO PARA INICIALIZAR SEMÁFOROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
+  printf("TEMPO PARA INICIALIZAR SINALEIROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
 }
 
 void scanCars() {
   for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
-    printf("SCAN - Semáforo %d. Quantidade de Carros: %d\n", i, sem_p[i]->cars_count);
+    printf("SCAN - Sinaleiro %d. Quantidade de Carros: %d\n", i, sem_p[i]->cars_count);
   }
 }
 
