@@ -77,6 +77,7 @@ void openSemaphore() {
 }
 
 int generateCarCount() {
+  srand (time(NULL));
   return rand() % CARS_PER_ARRIVAL + 1;
 }
 
@@ -125,6 +126,7 @@ void openSemaphoreTask() {
 void incomingCarsTask() {
   rt_task_set_periodic(NULL, TM_NOW, 400000000);
   while(1) {
+    srand (time(NULL));
     incomingCarsAt(rand() % NUM_SEMAPHORES);
     rt_task_wait_period(NULL);
   }
