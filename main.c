@@ -108,10 +108,13 @@ void scanCars() {
   }
 }
 
-void scanCarsQty() {
+void scanCarsQtyTask() {
   rt_task_set_periodic(NULL, TM_NOW, 200000000);
   while(1) {
+    RTIME start = rt_timer_read();
     scanCars();
+
+    printf("TEMPO PARA SCANNEAR CARROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
     rt_task_wait_period(NULL);
   }
 }
@@ -122,8 +125,8 @@ void openSemaphoreTask() {
     RTIME start = rt_timer_read();
     openSemaphore();
 
-    rt_task_wait_period(NULL);
     printf("TEMPO PARA LIBERAR CARROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
+    rt_task_wait_period(NULL);
   }
 }
 
@@ -134,8 +137,8 @@ void incomingCarsTask() {
     srand (time(NULL));
     incomingCarsAt(rand() % NUM_SEMAPHORES);
 
-    rt_task_wait_period(NULL);
     printf("TEMPO PARA ADICIONAR CARROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
+    rt_task_wait_period(NULL);
   }
 }
 
@@ -148,8 +151,8 @@ int main() {
   rt_task_create(&open_semaphore_t, "openSemaphoreTask", 0, 1, 0);
   rt_task_start(&open_semaphore_t, &openSemaphoreTask, 0);
 
-  rt_task_create(&scan_cars_qty_t, "scanCarsQty", 0, 1, 0);
-  rt_task_start(&scan_cars_qty_t, &scanCarsQty, 0);
+  rt_task_create(&scan_cars_qty_t, "scanCarsQtyTask", 0, 1, 0);
+  rt_task_start(&scan_cars_qty_t, &scanCarsQtyTask, 0);
 
   pause();
 
