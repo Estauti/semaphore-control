@@ -13,7 +13,7 @@
 #define CARS_PER_ARRIVAL 3
 #define TIME_TO_RELEASE_ONE_CAR 50
 
-static RT_TASK incoming_cars_t, open_semaphore_t;
+static RT_TASK incoming_cars_t, open_semaphore_t, scan_cars_qty_t;
 RT_SEM sem_1;
 
 int semaphore_index_to_release = 0;
@@ -100,6 +100,21 @@ void initializeSemaphores() {
   }
 }
 
+void scanCars() {
+  printf("TAREFA SCAN DE CARROS\n");
+  for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
+    printf("Semáforo %d. Quantidade de Carros: %d\n", i, sem_p[i]->cars_count);
+  }
+}
+
+void scanCarsQty() {
+  rt_task_set_periodic(NULL, TM_NOW, 200000000);
+  while(1) {
+    scanCars();
+    rt_task_wait_period(NULL);
+  }
+}
+
 void openSemaphoreTask() {
   rt_task_set_periodic(NULL, TM_NOW, 200000000);
   while(1) {
@@ -126,6 +141,9 @@ int main() {
 
   rt_task_create(&open_semaphore_t, "openSemaphoreTask", 0, 1, 0);
   rt_task_start(&open_semaphore_t, &openSemaphoreTask, 0);
+
+  rt_task_create(&scan_cars_qty_t, "scanCarsQty", 0, 1, 0);
+  rt_task_start(&scan_cars_qty_t, &scanCarsQty, 0);
 
   pause();
 
