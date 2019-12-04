@@ -89,6 +89,7 @@ void incomingCarsAt(int street) {
 }
 
 void initializeSemaphores() {
+  RTIME start = rt_timer_read();
   srand (time(NULL));
 
   for (int i = 0; i < NUM_SEMAPHORES; i++) {
@@ -98,12 +99,12 @@ void initializeSemaphores() {
 
     printf("rua %d, com %d carros\n", i, sem_p[i]->cars_count);
   }
+  printf("TEMPO PARA INICIALIZAR SEMÁFOROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
 }
 
 void scanCars() {
-  printf("TAREFA SCAN DE CARROS\n");
   for (size_t i = 0; i < NUM_SEMAPHORES; i++) {
-    printf("Semáforo %d. Quantidade de Carros: %d\n", i, sem_p[i]->cars_count);
+    printf("SCAN - Semáforo %d. Quantidade de Carros: %d\n", i, sem_p[i]->cars_count);
   }
 }
 
@@ -118,17 +119,23 @@ void scanCarsQty() {
 void openSemaphoreTask() {
   rt_task_set_periodic(NULL, TM_NOW, 200000000);
   while(1) {
+    RTIME start = rt_timer_read();
     openSemaphore();
+
     rt_task_wait_period(NULL);
+    printf("TEMPO PARA LIBERAR CARROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
   }
 }
 
 void incomingCarsTask() {
   rt_task_set_periodic(NULL, TM_NOW, 400000000);
   while(1) {
+    RTIME start = rt_timer_read();
     srand (time(NULL));
     incomingCarsAt(rand() % NUM_SEMAPHORES);
+
     rt_task_wait_period(NULL);
+    printf("TEMPO PARA ADICIONAR CARROS: %.6f\n", (rt_timer_read() - start)/1000000.0);
   }
 }
 
