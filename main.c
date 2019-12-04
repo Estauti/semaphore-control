@@ -14,7 +14,6 @@
 #define TIME_TO_RELEASE_ONE_CAR 50
 
 static RT_TASK incoming_cars_t, open_semaphore_t, scan_cars_qty_t;
-RT_SEM sem_1;
 
 int semaphore_index_to_release = 0;
 
@@ -133,8 +132,6 @@ void incomingCarsTask() {
 
 int main() {
   initializeSemaphores();
-
-  rt_sem_create (&sem_1, "sem_to_release", 1, S_FIFO);
 
   rt_task_create(&incoming_cars_t, "incomingCarsTask", 0, 1, 0);
   rt_task_start(&incoming_cars_t, &incomingCarsTask, 0);
